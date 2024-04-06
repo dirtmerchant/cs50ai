@@ -24,7 +24,7 @@ def load_data(directory):
             people[row["id"]] = {
                 "name": row["name"],
                 "birth": row["birth"],
-                "movies": set()
+                "movies": set(),
             }
             if row["name"].lower() not in names:
                 names[row["name"].lower()] = {row["id"]}
@@ -38,7 +38,7 @@ def load_data(directory):
             movies[row["id"]] = {
                 "title": row["title"],
                 "year": row["year"],
-                "stars": set()
+                "stars": set(),
             }
 
     # Load stars
@@ -85,15 +85,38 @@ def main():
 
 
 def shortest_path(source, target):
-    """
-    Returns the shortest list of (movie_id, person_id) pairs
-    that connect the source to the target.
+    explored = set()
+    frontier = QueueFrontier()
+    frontier.add(Node(source, None, None))
 
-    If no possible path, returns None.
-    """
+    # iteration = 0  # For limiting iterations during debugging
+    # while not frontier.empty() and iteration < 1000:  # Limit iterations to 1000 for debugging
+    while not frontier.empty():
+        node = frontier.remove()
+        # print(f"Exploring: {node.state}, Target: {target}")  # Debugging output
+
+        if node.state == target:
+            solution = []
+            while node.parent is not None:
+                solution.append((node.action, node.state))
+                node = node.parent
+            solution.reverse()
+            return solution
+
+        explored.add(node.state)
+
+        for movie, person in neighbors_for_person(node.state):
+            # print(f"Neighbor: {person}, Movie: {movie}")  # Debugging output
+            if person not in explored and not frontier.contains_state(person):
+                child = Node(person, node, movie)
+                frontier.add(child)
+
+        # iteration += 1  # Increment the iteration counter
+
+    return None
 
     # TODO
-    raise NotImplementedError
+    # raise NotImplementedError
 
 
 def person_id_for_name(name):
